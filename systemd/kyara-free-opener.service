@@ -1,0 +1,6 @@
+[Unit]
+Description=Open one available Kyara free booster
+
+[Service]
+Type=oneshot
+ExecStart=%h/kyara-free-opener/kyara-free-opener.sh run

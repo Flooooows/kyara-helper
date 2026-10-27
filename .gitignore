@@ -1,0 +1,20 @@
+# Sessions et données locales Kyara
+*storage-state*.json
+opened-boosters.tsv
+.run.lock
+.env
+.env.*
+!.env.example
+
+# Journaux et captures de diagnostic
+*.log
+.playwright-cli/
+last-no-free-button.png
+output/playwright/
+test-results/
+playwright-report/
+
+# Dépendances et fichiers système
+node_modules/
+.DS_Store
+Thumbs.db

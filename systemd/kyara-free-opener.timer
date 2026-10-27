@@ -1,0 +1,12 @@
+[Unit]
+Description=Check Kyara for a free booster every 15 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+AccuracySec=30s
+Persistent=true
+Unit=kyara-free-opener.service
+
+[Install]
+WantedBy=timers.target

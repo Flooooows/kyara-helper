@@ -1,0 +1,8 @@
+{
+  "name": "kyara-free-opener-windows",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "playwright": "latest"
+  }
+}
