@@ -1,7 +1,14 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { buildSeries, bestOffers, estimate, sellableDuplicates, updatePinnedSeries } = require('./kyara-market-series.user.js');
+const { buildSeries, bestOffers, estimate, sellableDuplicates, updatePinnedSeries, completedMissionSeries } = require('./kyara-market-series.user.js');
 const cards = Array.from({ length: 5 }, (_, i) => ({ id: i + 1, name: `Card ${i}`, series: 'A' }));
+test('Mission completions use only valid series names', () => {
+  const completed = completedMissionSeries({ progress: { series: [
+    { series: 'Completed' }, { series: '  ' }, {}, null, { series: 'Another' }
+  ] } });
+  assert.deepEqual([...completed], ['Completed', 'Another']);
+  assert.equal(completedMissionSeries({}).size, 0);
+});
 test('Purchases update counts without moving rows or removing completed series and card slots', () => {
   const snapshot = [{ name: 'B', total: 2, missing: [{ id: 10 }, { id: 11 }] },
     { name: 'A', total: 3, missing: [{ id: 20 }, { id: 21 }] }];

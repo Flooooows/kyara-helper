@@ -171,3 +171,12 @@ vérifiés en lecture dans le navigateur le 27 octobre. Vente revérifiant son p
 conservée. Le relevé désactive les ventes pour éviter les modifications simultanées.
 Syntaxe valide et seize tests réussis, incluant regroupement/arrêt anticipé,
 classement décroissant, repli médian et prix inconnus. Aucune vente réalisée.
+
+Version 2.11 : filtre d'achat « Masquer les séries déjà terminées (Missions) »,
+actif par défaut. Il exploite `progress.series` de `/api/me/bootstrap`, la même
+liste individuelle affichée par Kyara dans Missions, et masque ces séries même
+si la collection courante les voit incomplètes. Un changement de compte vide la
+liste en mémoire. Réinitialiser les filtres réactive cette protection. Validation :
+18 tests Node, syntaxe et détecteur UI sans résultat. Dans le navigateur connecté,
+case cochée par défaut ; 1 102 séries / 6 010 cartes sans masque contre 968 /
+5 189 avec masque, soit 134 séries exclues. Aucune transaction effectuée.

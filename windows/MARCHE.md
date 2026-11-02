@@ -20,6 +20,11 @@ uniquement dans **Vendre**. Les contrôles natifs du marché restent accessibles
 
 Le tableau propose une recherche par série, des bornes minimum/maximum de cartes
 manquantes et de taille de série, ainsi que le filtre « Séries déjà commencées ».
+La case **Masquer les séries déjà terminées (Missions)** est activée par défaut.
+Elle utilise la liste des récompenses de séries déjà complétées dans Kyara
+(`Missions`) : elle peut donc cacher une série que la collection considère de
+nouveau incomplète, par exemple après une évolution du catalogue. Décoche-la pour
+la revoir. La liste s'actualise lorsque Kyara recharge les données du compte.
 Une borne vide ne limite pas les résultats. Le tri peut porter sur les cartes
 manquantes, la taille, la progression ou le nom. Les séries sont paginées par 25.
 **Analyser les séries filtrées** analyse toute la sélection, pas uniquement la

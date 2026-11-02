@@ -67,6 +67,10 @@ function harness(storage = new Map(), responses = [200], marketPages = [{ items:
       },
       filterSeries(catalog, owned, values) {
         characters = catalog; collection = owned; filters = values; return seriesList();
+      },
+      filterMissionCompleted(catalog, owned, completed) {
+        characters = catalog; collection = owned; filters = { hideMissionCompleted: { checked: true } };
+        missionCompleted = new Set(completed); return seriesList();
       }
     };
     setInterval(mount, 800);`), context);
@@ -174,4 +178,11 @@ test('Dashboard combines size, missing-count and started filters with sorting', 
   assert.deepEqual(names({ search: { value: 'LARGE' }, totalMax: { value: '5' } }), []);
   assert.deepEqual(names({ sort: { value: 'name' } }), ['Large', 'Small']);
   assert.deepEqual(names({ sort: { value: 'progress' } }), ['Small', 'Large']);
+});
+
+test('Mission-completed series can be hidden even when the collection shows them incomplete', () => {
+  const h = harness();
+  const catalog = [{ id: 1, series: 'Already rewarded' }, { id: 2, series: 'Still needed' }];
+  const shown = h.filterMissionCompleted(catalog, [], ['Already rewarded']);
+  assert.deepEqual(Array.from(shown, s => s.name), ['Still needed']);
 });

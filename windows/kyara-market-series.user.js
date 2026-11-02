@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kyara - Compléter les petites séries
 // @namespace    kyara-local-helper
-// @version      2.10.0
+// @version      2.11.0
 // @description  Collection, cartes manquantes, offres les moins chères et budgets.
 // @match        https://kyara.games/*
 // @run-at       document-start
@@ -57,14 +57,20 @@
     return rows.sort((a, b) => (prices.get(b.id)?.price ?? -1) - (prices.get(a.id)?.price ?? -1) || a.name.localeCompare(b.name));
   }
 
+  function completedMissionSeries(bootstrap) {
+    return new Set((bootstrap?.progress?.series || [])
+      .map(entry => entry?.series)
+      .filter(name => typeof name === 'string' && name.trim()));
+  }
+
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { buildSeries, bestOffers, estimate, sellableDuplicates, updatePinnedSeries, sortSaleCards };
+    module.exports = { buildSeries, bestOffers, estimate, sellableDuplicates, updatePinnedSeries, sortSaleCards, completedMissionSeries };
     return;
   }
 
   const storageKey = 'kyara-helper-series';
   const nativeFetch = window.fetch;
-  let headers = null, characters = null, collection = null, chakra = null;
+  let headers = null, characters = null, collection = null, chakra = null, missionCompleted = new Set();
   let scope = null, panel, body, status, cardInput, seriesInput, affordableInput, scopeInput;
   let busy = false, cancel = false, accountId = null;
   let salesBody, salesSearch, salesStatus, preparingSale = false;
@@ -101,9 +107,10 @@
     if (path === '/api/characters' && Array.isArray(value)) characters = value;
     if (path === '/api/me/collection' && Array.isArray(value)) collection = value;
     if (path === '/api/me/bootstrap' && value.me) {
-      if (accountId && value.me.id !== accountId) { collection = null; quotes.clear(); salePrices.clear(); cancelSalesPricing = true; pinnedSeries = null; purchasePosition = null; }
+      if (accountId && value.me.id !== accountId) { collection = null; quotes.clear(); salePrices.clear(); missionCompleted = new Set(); cancelSalesPricing = true; pinnedSeries = null; purchasePosition = null; }
       accountId = value.me.id;
       chakra = Number.isFinite(value.me.chakra) ? value.me.chakra : null;
+      missionCompleted = completedMissionSeries(value);
     }
     render();
   }
@@ -155,7 +162,8 @@
     const within = (n, min, max) => (value(min) === '' || n >= Number(value(min))) && (value(max) === '' || n <= Number(value(max)));
     return rows.filter(s => s.name.toLocaleLowerCase().includes(value('search').toLocaleLowerCase()) &&
       within(s.missing.length, 'missingMin', 'missingMax') && within(s.total, 'totalMin', 'totalMax') &&
-      (!filters.started?.checked || s.missing.length < s.total))
+      (!filters.started?.checked || s.missing.length < s.total) &&
+      (!filters.hideMissionCompleted?.checked || !missionCompleted.has(s.name)))
       .sort((a, b) => {
         const order = value('sort');
         const delta = order === 'total' ? a.total - b.total : order === 'progress' ?
@@ -512,13 +520,15 @@
     filter('missingMin', 'Manquantes · minimum'); filter('missingMax', 'Manquantes · maximum');
     filter('totalMin', 'Taille de série · minimum'); filter('totalMax', 'Taille de série · maximum');
     filter('started', 'Séries déjà commencées', 'checkbox');
+    filter('hideMissionCompleted', 'Masquer les séries déjà terminées (Missions)', 'checkbox');
+    filters.hideMissionCompleted.checked = true;
     const sortLabel = element('label', 'Trier par'); filters.sort = element('select');
     for (const [name, value] of [['Cartes manquantes', 'missing'], ['Taille de série', 'total'], ['Progression décroissante', 'progress'], ['Nom de série', 'name']]) filters.sort.append(new Option(name, value));
     filters.sort.onchange = () => { dashboardPage = 0; render(); };
     sortLabel.append(filters.sort); filterBar.append(sortLabel);
     filterBar.append(button('Réinitialiser les filtres', () => {
       Object.values(filters).forEach(input => { if (input.type === 'checkbox') input.checked = false; else input.value = ''; });
-      filters.sort.value = 'missing'; affordableInput.checked = false; dashboardPage = 0; pinnedSeries = null; render();
+      filters.sort.value = 'missing'; filters.hideMissionCompleted.checked = true; affordableInput.checked = false; dashboardPage = 0; pinnedSeries = null; render();
     }));
     const filterSection = element('details'); filterSection.className = 'kh-filter-section';
     filterSection.append(element('summary', 'Affiner ma sélection · filtres et budgets'), filterBar);
